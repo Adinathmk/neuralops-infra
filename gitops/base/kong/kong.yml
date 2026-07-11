@@ -1,0 +1,392 @@
+# ============================================================
+# NeuralOps — Kong Declarative Configuration (DB-less mode)
+# Kubernetes adaptation: ONLY the two upstream `target` values changed,
+# from docker-compose service names (django:8000 / fastapi:8001) to
+# k8s Service DNS (django.app.svc.cluster.local:8000 / fastapi...).
+# Everything else copied verbatim from kong/kong.yml in the app repo.
+#
+# The redis_host: redis references in rate-limiting plugins below assume
+# a k8s Service named "redis" reachable from the Kong pod's namespace —
+# confirm/patch this per-overlay once Redis endpoint is finalized
+# (local: in-cluster redis Service; prod: ElastiCache — rate-limiting's
+# redis_host would need to become the ElastiCache endpoint via overlay
+# patch, since Kong's redis-policy rate limiter expects a real Redis
+# connection, not just any cache).
+# ============================================================
+_format_version: "3.0"
+_transform: true
+
+# ── Upstreams ──────────────────────────────────────────────────────────────────
+upstreams:
+  - name: django-upstream
+    targets:
+      - target: django.app.svc.cluster.local:8000
+        weight: 100
+
+  - name: fastapi-upstream
+    targets:
+      - target: fastapi.app.svc.cluster.local:8001
+        weight: 100
+
+# ── Services ───────────────────────────────────────────────────────────────────
+services:
+  # ── Django Core Management Service ─────────────────────────────────────────
+  - name: django-service
+    host: django-upstream
+    port: 80
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 120000
+    write_timeout: 120000
+    routes:
+      - name: auth-route
+        paths:
+          - /api/v1/auth
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 20
+              policy: redis
+              redis_host: redis
+              redis_port: 6379
+              fault_tolerant: true
+              hide_client_headers: false
+
+      - name: admin-route
+        paths:
+          - /api/admin
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 60
+              policy: redis
+              redis_host: redis
+              redis_port: 6379
+              fault_tolerant: true
+              hide_client_headers: false
+          - name: jwt
+            config:
+              claims_to_verify: [exp]
+              key_claim_name: iss
+          - name: request-transformer
+            config:
+              add:
+                headers: ["X-Gateway-Validated: true"]
+
+      - name: django-management-route
+        paths:
+          - /api/v1/tenant
+          - /api/v1/alerts
+          - /api/v1/playbooks
+          - /api/v1/integrations
+          - /api/v1/team
+          - /api/v1/push
+          - /api/v1/billing/subscribe
+          - /api/v1/billing/verify
+          - /api/v1/collaboration
+          - /api/v1/notifications
+          - /api/v1/users
+          - /api/v1/analytics
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 2000
+              limit_by: header
+              header_name: x-tenant-id
+              policy: redis
+              redis_host: redis
+              redis_port: 6379
+              fault_tolerant: true
+              hide_client_headers: false
+          - name: jwt
+            config:
+              claims_to_verify: [exp]
+              key_claim_name: iss
+          - name: request-transformer
+            config:
+              add:
+                headers: ["X-Gateway-Validated: true"]
+
+      - name: invitations-route
+        paths:
+          - /api/v1/invitations
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+      - name: billing-webhook-route
+        paths:
+          - /api/v1/billing/webhook/razorpay
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+      - name: schema-routes
+        paths:
+          - /api/v1/schema
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+      - name: static-routes
+        paths:
+          - /static
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+      - name: media-routes
+        paths:
+          - /media
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+      - name: django-admin-panel
+        paths:
+          - /admin
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+      - name: django-health-route
+        paths:
+          - /api/v1/health
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+      - name: django-websocket-route
+        paths:
+          - /ws
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+        headers:
+          Upgrade:
+            - websocket
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              limit_by: header
+              header_name: x-tenant-id
+              policy: redis
+              redis_host: redis
+              redis_port: 6379
+              fault_tolerant: true
+              hide_client_headers: false
+          - name: jwt
+            config:
+              claims_to_verify: [exp]
+              key_claim_name: iss
+          - name: request-transformer
+            config:
+              add:
+                headers: ["X-Gateway-Validated: true"]
+
+  # ── FastAPI AI + Real-time Service ─────────────────────────────────────────
+  - name: fastapi-service
+    host: fastapi-upstream
+    port: 80
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 120000
+    write_timeout: 120000
+    routes:
+      - name: ingest-logs-route
+        paths:
+          - /api/v1/ingest/logs
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 5000
+              limit_by: ip
+              policy: redis
+              redis_host: redis
+              redis_port: 6379
+              fault_tolerant: true
+              hide_client_headers: false
+
+      - name: ingest-webhook-route
+        paths:
+          - /api/v1/webhooks
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 200
+              limit_by: header
+              header_name: x-tenant-id
+              policy: redis
+              redis_host: redis
+              redis_port: 6379
+              fault_tolerant: true
+              hide_client_headers: false
+
+      - name: fastapi-general-route
+        paths:
+          - /api/v1/
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 2000
+              limit_by: header
+              header_name: x-tenant-id
+              policy: redis
+              redis_host: redis
+              redis_port: 6379
+              fault_tolerant: true
+              hide_client_headers: false
+          - name: jwt
+            config:
+              claims_to_verify: [exp]
+              key_claim_name: iss
+          - name: request-transformer
+            config:
+              add:
+                headers: ["X-Gateway-Validated: true"]
+
+      - name: health-route
+        paths:
+          - /health
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+# ── Consumers ──────────────────────────────────────────────────────────────────
+consumers:
+  - username: neuralops-app
+    jwt_secrets:
+      - key: neuralops-jwt-key
+        algorithm: RS256
+        rsa_public_key: |
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArw/EwBiAmWXR2hJBYR5Q
+          M/dUvBKyQ6L+tcTrNRVWWaPIEX0TJ/mpAS8uCwYjV4Mj/2/NwMyQn/D8T/2d3v/J
+          tY/eziz8u7MzBgWnPOyOvPGd811SNiHIRCFDmDkUIRAmKcTfY06/XL/+nSdzCmv7
+          GOhDpQFcu5t2kXpXo+JYzZRXiNfOolesKgL5H9OvfIQEcDbjYLkH6bleCyZayAa0
+          wXX1oDNzPDdHzTRsljra45lBUaQGlZf9/u/T+3aymbG3KtXPGttBpor5w7lXP757
+          /GRZ1m/2fP4xtq0UlpB6M6hTbH/fxmY8HD0Mz08+e5+dQHa+4+jFSTQSC5iRtQcG
+          QQIDAQAB
+          -----END PUBLIC KEY-----
+# NOTE (k8s-specific): this rsa_public_key MUST be the public half of the
+# same JWT_PRIVATE_KEY Django signs with. Once JWT keys move into AWS
+# Secrets Manager / ExternalSecrets, keep this Kong ConfigMap regenerated
+# from the same source key pair — do not let them drift out of sync
+# between Django's secret and Kong's declarative config.
+
+# ── Global Plugins ─────────────────────────────────────────────────────────────
+plugins:
+  # ── CORS (Cross-Origin Resource Sharing) ──────────────────────────────────
+  - name: cors
+    config:
+      origins:
+        - "http://localhost:3000"
+        - "http://localhost:5173"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - Authorization
+        - X-Requested-With
+        - X-Request-ID
+        - X-Gateway-Validated
+      exposed_headers:
+        - X-Auth-Token
+        - X-RateLimit-Limit-Minute
+        - X-RateLimit-Remaining-Minute
+        - X-RateLimit-Reset
+        - Retry-After
+      credentials: true
+      max_age: 3600
+
+  # ── Custom 429 JSON Response & JWT Claims Injection ────────────────────────
+  - name: pre-function
+    config:
+      access:
+        - |
+          local auth_header = kong.request.get_header("Authorization")
+          if auth_header and string.sub(auth_header, 1, 7) == "Bearer " then
+            local token = string.sub(auth_header, 8)
+            local payload_b64 = token:match("^[^%.]+%.([^%.]+)%.[^%.]+$")
+            if payload_b64 then
+              local remainder = #payload_b64 % 4
+              if remainder > 0 then
+                payload_b64 = payload_b64 .. string.rep("=", 4 - remainder)
+              end
+              local payload_b64_url = payload_b64:gsub("-", "+"):gsub("_", "/")
+              local decoded = ngx.decode_base64(payload_b64_url)
+              if decoded then
+                local cjson = require("cjson.safe")
+                local payload = cjson.decode(decoded)
+                if payload then
+                  if payload.tenant_id then kong.service.request.set_header("x-tenant-id", payload.tenant_id) end
+                  if payload.user_id then kong.service.request.set_header("x-user-id", payload.user_id) end
+                  if payload.role then kong.service.request.set_header("x-user-role", payload.role) end
+                  if payload.email then kong.service.request.set_header("x-user-email", payload.email) end
+                  if payload.is_superadmin ~= nil then kong.service.request.set_header("x-is-superadmin", tostring(payload.is_superadmin)) end
+                  if payload.plan_tier then
+                    kong.service.request.set_header("x-plan-tier", payload.plan_tier)
+                  else
+                    kong.service.request.set_header("x-plan-tier", "free")
+                  end
+                end
+              end
+            end
+          end
+      header_filter:
+        - |
+          if kong.response.get_status() == 429 then
+            kong.response.set_header("Content-Type", "application/json")
+          end
+      body_filter:
+        - |
+          if kong.response.get_status() == 429 then
+            local chunk = ngx.arg[1]
+            local eof = ngx.arg[2]
+            if not ngx.ctx.buffer then
+              ngx.ctx.buffer = ""
+            end
+            if chunk then
+              ngx.ctx.buffer = ngx.ctx.buffer .. chunk
+              ngx.arg[1] = nil
+            end
+            if eof then
+              local cjson = require("cjson.safe")
+              local res = cjson.encode({
+                success = false,
+                code = "rate_limit_exceeded",
+                message = "API rate limit exceeded. Please retry later.",
+                retry_after = kong.response.get_header("Retry-After")
+              })
+              ngx.arg[1] = res
+            end
+          end

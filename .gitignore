@@ -1,0 +1,19 @@
+# Local secrets — once you fill in real JWT/Fernet keys for local testing,
+# stop tracking this file (git rm --cached, then this ignore takes over).
+# Keeping it tracked with placeholder values (as I generated it) is fine
+# short-term, but the moment real key material goes in, untrack it.
+gitops/overlays/local/secrets.yaml
+
+# Terraform state and local overrides — never commit state files, they
+# can contain secrets in plaintext and cause conflicts. Use a remote
+# backend (S3) once terraform/platform is written.
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform.lock.hcl
+**/terraform.tfvars
+
+# kind kubeconfig exports, if you ever dump one locally
+kubeconfig*.yaml
+
+.DS_Store

@@ -1,0 +1,47 @@
+# Command confirmed from docker-compose.yml celery-worker-fastapi service:
+#   celery -A app.worker.celery_app worker --concurrency=1 --queues=celery,embed
+# Broker: Redis db 2 — hard-isolated from Django's db 0 (see celery_app.py
+# docstring: "This hard separation ensures... KEDA ScaledObjects can
+# target the correct Redis key prefix per service").
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker-fastapi
+  namespace: app
+  labels:
+    app: celery-worker-fastapi
+    tier: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-worker-fastapi
+  template:
+    metadata:
+      labels:
+        app: celery-worker-fastapi
+    spec:
+      containers:
+        - name: celery-worker-fastapi
+          image: PLACEHOLDER_ECR_REPO/neuralops-fastapi:latest # same image as fastapi, different command
+          imagePullPolicy: IfNotPresent
+          command: ["celery"]
+          args:
+            - "-A"
+            - "app.worker.celery_app"
+            - "worker"
+            - "--loglevel=info"
+            - "--concurrency=1"
+            - "--queues=celery,embed"
+          envFrom:
+            - configMapRef:
+                name: fastapi-config
+            - secretRef:
+                name: fastapi-secrets
+          resources:
+            requests:
+              cpu: 150m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

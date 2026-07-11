@@ -1,0 +1,49 @@
+# Command confirmed from docker-compose.yml celery-beat service.
+# CRITICAL: replicas MUST stay at 1. django_celery_beat's DatabaseScheduler
+# has no leader-election — running >1 replica double-fires every
+# scheduled task (invitation cleanup, token cleanup, Razorpay sync).
+# Do not attach an HPA to this Deployment.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-beat
+  namespace: app
+  labels:
+    app: celery-beat
+    tier: scheduler
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # avoid two beats running simultaneously during rollout
+  selector:
+    matchLabels:
+      app: celery-beat
+  template:
+    metadata:
+      labels:
+        app: celery-beat
+    spec:
+      containers:
+        - name: celery-beat
+          image: PLACEHOLDER_ECR_REPO/neuralops-django:latest # production target, not worker
+          imagePullPolicy: IfNotPresent
+          command: ["celery"]
+          args:
+            - "-A"
+            - "config"
+            - "beat"
+            - "--loglevel=info"
+            - "--scheduler"
+            - "django_celery_beat.schedulers:DatabaseScheduler"
+          envFrom:
+            - configMapRef:
+                name: django-config
+            - secretRef:
+                name: django-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

@@ -1,0 +1,35 @@
+# ============================================================
+# kind cluster config — local dev/test cluster for NeuralOps
+# Mirrors EKS topology loosely: 1 control-plane + 2 workers
+# ============================================================
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: neuralops-local
+
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # Map host ports to the ingress controller's NodePort/hostPort
+      # so http(s)://localhost works without a cloud LB.
+      - containerPort: 80
+        hostPort: 8080
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 8443
+        protocol: TCP
+
+  - role: worker
+  - role: worker
+
+# NOTE: kind has no cloud LoadBalancer support out of the box.
+# For local testing we use an Ingress controller (e.g. ingress-nginx)
+# with hostPort mapping above, NOT the AWS Load Balancer Controller
+# (that only makes sense against real EKS). The `overlays/local`
+# Kustomize overlay swaps Ingress class + annotations accordingly —
+# see gitops/overlays/local/ingress-patch.yaml (added later).

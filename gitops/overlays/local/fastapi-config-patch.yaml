@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fastapi-config
+  namespace: app
+data:
+  APP_ENV: "development"
+  DEBUG: "true"
+  DATABASE_URL: "postgresql+asyncpg://neuralops_fastapi:fastapi_password@fastapi-db.data.svc.cluster.local:5432/neuralops_fastapi_db"
+  REDIS_URL: "redis://redis.data.svc.cluster.local:6379/1"
+  CELERY_BROKER_URL: "redis://redis.data.svc.cluster.local:6379/2"
+  CELERY_RESULT_BACKEND: "redis://redis.data.svc.cluster.local:6379/2"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.data.svc.cluster.local:9092"
+  ELASTICSEARCH_HOSTS: '["http://elasticsearch.data.svc.cluster.local:9200"]'

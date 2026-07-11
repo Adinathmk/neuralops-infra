@@ -1,0 +1,16 @@
+# Strategic-merge patches: ADD keys to the base ConfigMaps that were
+# deliberately left out of base/ (since they differ between local/prod).
+# These values point at the local-infra.yaml Services above.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+  namespace: app
+data:
+  DEBUG: "True"
+  ALLOWED_HOSTS: "localhost,127.0.0.1,*"
+  DATABASE_URL: "postgresql://neuralops:neuralops_password@django-db.data.svc.cluster.local:5432/django_db"
+  DATABASE_REPLICA_URL: "postgresql://neuralops:neuralops_password@django-db.data.svc.cluster.local:5432/django_db"
+  REDIS_URL: "redis://redis.data.svc.cluster.local:6379/0"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.data.svc.cluster.local:9092"
+  ELASTICSEARCH_URL: "http://elasticsearch.data.svc.cluster.local:9200"

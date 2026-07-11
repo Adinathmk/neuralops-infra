@@ -1,0 +1,39 @@
+# Uses the `kafka-consumer` build target from django/Dockerfile, whose
+# entrypoint (entrypoint.kafka_consumer.sh) launches BOTH
+# `consume_indexing_status` and `consume_incidents` as background
+# processes in a single container — matches docker-compose's
+# django-kafka-consumer service exactly, just running in-cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-kafka-consumer
+  namespace: app
+  labels:
+    app: django-kafka-consumer
+    tier: consumer
+spec:
+  replicas: 1 # do not scale >1 without partition-aware consumer group review
+  selector:
+    matchLabels:
+      app: django-kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: django-kafka-consumer
+    spec:
+      containers:
+        - name: django-kafka-consumer
+          image: PLACEHOLDER_ECR_REPO/neuralops-django-kafka-consumer:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: django-config
+            - secretRef:
+                name: django-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi

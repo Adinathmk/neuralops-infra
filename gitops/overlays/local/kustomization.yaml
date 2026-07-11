@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - local-infra.yaml
+  - secrets.yaml
+  - ingress.yaml
+
+patches:
+  - path: django-config-patch.yaml
+    target:
+      kind: ConfigMap
+      name: django-config
+  - path: fastapi-config-patch.yaml
+    target:
+      kind: ConfigMap
+      name: fastapi-config
+
+# All base Deployments use PLACEHOLDER_ECR_REPO images — for local
+# testing these are swapped to images built+loaded directly into kind
+# (no registry round-trip needed locally). Run:
+#   docker build -t neuralops-django:local ./django --target production
+#   docker build -t neuralops-django-worker:local ./django --target worker
+#   docker build -t neuralops-django-kafka-consumer:local ./django --target kafka-consumer
+#   docker build -t neuralops-fastapi:local ./fastapi --target production
+#   kind load docker-image neuralops-django:local --name neuralops-local
+#   kind load docker-image neuralops-django-worker:local --name neuralops-local
+#   kind load docker-image neuralops-django-kafka-consumer:local --name neuralops-local
+#   kind load docker-image neuralops-fastapi:local --name neuralops-local
+images:
+  - name: PLACEHOLDER_ECR_REPO/neuralops-django
+    newName: neuralops-django
+    newTag: local
+  - name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
+    newName: neuralops-django-worker
+    newTag: local
+  - name: PLACEHOLDER_ECR_REPO/neuralops-django-kafka-consumer
+    newName: neuralops-django-kafka-consumer
+    newTag: local
+  - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
+    newName: neuralops-fastapi
+    newTag: local

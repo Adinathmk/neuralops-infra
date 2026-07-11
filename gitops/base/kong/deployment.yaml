@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+  namespace: app
+  labels:
+    app: kong
+    tier: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+        - name: kong
+          image: kong:3.7-ubuntu
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /usr/local/kong/declarative/kong.yml
+            - name: KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8444"
+            - name: KONG_PROXY_LISTEN
+              value: "0.0.0.0:80"
+            - name: KONG_LOG_LEVEL
+              value: "info"
+            - name: KONG_NGINX_WORKER_PROCESSES
+              value: "1"
+            - name: KONG_MEM_CACHE_SIZE
+              value: "32m"
+            - name: KONG_UNTRUSTED_LUA
+              value: "on"
+            - name: KONG_REDIS_HOST
+              value: "redis" # overlay-patched to ElastiCache endpoint in prod
+            - name: KONG_REDIS_PORT
+              value: "6379"
+            - name: KONG_NGINX_PROXY_REAL_IP_HEADER
+              value: "X-Forwarded-For"
+            - name: KONG_TRUSTED_IPS
+              value: "0.0.0.0/0,::/0"
+          ports:
+            - containerPort: 80
+              name: proxy
+            - containerPort: 8444
+              name: admin
+          volumeMounts:
+            - name: kong-declarative-config
+              mountPath: /usr/local/kong/declarative
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8444
+              scheme: HTTPS
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8444
+              scheme: HTTPS
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+      volumes:
+        - name: kong-declarative-config
+          configMap:
+            name: kong-declarative-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong
+  namespace: app
+spec:
+  selector:
+    app: kong
+  ports:
+    - name: proxy
+      port: 80
+      targetPort: 80
+    - name: admin
+      port: 8444
+      targetPort: 8444

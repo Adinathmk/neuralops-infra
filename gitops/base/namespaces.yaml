@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app
+  labels:
+    purpose: neuralops-application
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: data
+  labels:
+    purpose: neuralops-stateful-data
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    purpose: neuralops-observability
