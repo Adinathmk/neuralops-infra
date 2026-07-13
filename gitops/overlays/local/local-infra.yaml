@@ -20,6 +20,7 @@ spec:
     metadata:
       labels: { app: django-db }
     spec:
+      enableServiceLinks: false
       containers:
         - name: django-db
           image: pgvector/pgvector:pg16
@@ -139,14 +140,18 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels: { app: kafka }
+    matchLabels:
+      app: kafka
   template:
     metadata:
-      labels: { app: kafka }
+      labels:
+        app: kafka
     spec:
+      enableServiceLinks: false
       containers:
         - name: kafka
           image: confluentinc/cp-kafka:7.7.0
+          imagePullPolicy: IfNotPresent
           env:
             - { name: CLUSTER_ID, value: "RdEoWBwUQyuyHQvv8SfHSA" }
             - { name: KAFKA_NODE_ID, value: "1" }
@@ -161,9 +166,18 @@ spec:
             - { name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR, value: "1" }
             - { name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR, value: "1" }
             - { name: KAFKA_AUTO_CREATE_TOPICS_ENABLE, value: "true" }
+            - { name: KAFKA_LOG_DIRS, value: "/var/lib/kafka/data" }
           ports:
             - containerPort: 9092
             - containerPort: 9093
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
+
+      volumes:
+        - name: kafka-data
+          emptyDir: {}
+
 ---
 apiVersion: v1
 kind: Service
@@ -171,8 +185,11 @@ metadata:
   name: kafka
   namespace: data
 spec:
-  selector: { app: kafka }
-  ports: [{ port: 9092, targetPort: 9092 }]
+  selector:
+    app: kafka
+  ports:
+    - port: 9092
+      targetPort: 9092
 
 ---
 # ── Elasticsearch (single-node) ───────────────────────────────────────────────

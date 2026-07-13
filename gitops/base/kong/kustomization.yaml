@@ -4,6 +4,7 @@ resources:
   - deployment.yaml
 configMapGenerator:
   - name: kong-declarative-config
+    namespace: app
     files:
       - kong.yml
 generatorOptions:

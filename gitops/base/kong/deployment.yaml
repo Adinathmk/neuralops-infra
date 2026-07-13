@@ -65,14 +65,14 @@ spec:
             httpGet:
               path: /status
               port: 8444
-              scheme: HTTPS
+              scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /status
               port: 8444
-              scheme: HTTPS
+              scheme: HTTP
             initialDelaySeconds: 20
             periodSeconds: 20
           resources:

@@ -33,15 +33,16 @@ helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace \
   --set controller.hostPort.enabled=true \
   --set controller.service.type=ClusterIP \
-  --set controller.nodeSelector."ingress-ready"="true" \
-  --set controller.tolerations[0].key="node-role.kubernetes.io/control-plane" \
-  --set controller.tolerations[0].operator="Exists" \
-  --set controller.tolerations[0].effect="NoSchedule" \
+  --set-string controller.nodeSelector."ingress-ready"="true" \
+  --set-string controller.tolerations[0].key="node-role.kubernetes.io/control-plane" \
+  --set-string controller.tolerations[0].operator="Exists" \
+  --set-string controller.tolerations[0].effect="NoSchedule" \
   --wait
 
 echo "==> [4/5] Installing ArgoCD..."
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply --server-side --force-conflicts -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 echo "    Waiting for ArgoCD server to become ready (this can take a couple minutes)..."
 kubectl -n argocd wait --for=condition=available --timeout=300s deployment/argocd-server
