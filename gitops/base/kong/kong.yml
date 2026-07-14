@@ -28,6 +28,11 @@ upstreams:
       - target: fastapi.app.svc.cluster.local:8001
         weight: 100
 
+  - name: minio-upstream
+    targets:
+      - target: minio.data.svc.cluster.local:9000
+        weight: 100
+
 # ── Services ───────────────────────────────────────────────────────────────────
 services:
   # ── Django Core Management Service ─────────────────────────────────────────
@@ -137,6 +142,8 @@ services:
         preserve_host: true
         protocols: [http, https]
 
+
+
       - name: static-routes
         paths:
           - /static
@@ -189,6 +196,7 @@ services:
             config:
               claims_to_verify: [exp]
               key_claim_name: iss
+              uri_param_names: ["jwt"]
           - name: request-transformer
             config:
               add:
@@ -268,6 +276,22 @@ services:
         paths:
           - /health
         strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
+  # ── MinIO Service ────────────────────────────────────────────────────────
+  - name: minio-service
+    host: minio-upstream
+    port: 9000
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 120000
+    write_timeout: 120000
+    routes:
+      - name: minio-artifacts-route
+        paths:
+          - /artifacts
+        strip_path: true
         preserve_host: true
         protocols: [http, https]
 

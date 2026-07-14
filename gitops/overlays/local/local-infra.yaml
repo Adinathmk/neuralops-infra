@@ -24,6 +24,13 @@ spec:
       containers:
         - name: django-db
           image: pgvector/pgvector:pg16
+          args:
+            - -c
+            - wal_level=logical
+            - -c
+            - max_replication_slots=10
+            - -c
+            - max_wal_senders=10
           env:
             - { name: POSTGRES_DB, value: "django_db" }
             - { name: POSTGRES_USER, value: "neuralops" }
@@ -40,6 +47,19 @@ spec:
       volumes:
         - name: data
           emptyDir: {}
+      initContainers:
+        - name: init-publication
+          image: pgvector/pgvector:pg16
+          env:
+            - { name: PGPASSWORD, value: "neuralops_password" }
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h 127.0.0.1 -U neuralops -d django_db; do sleep 1; done
+              psql -h 127.0.0.1 -U neuralops -d django_db -c \
+                "CREATE PUBLICATION debezium_django_publication FOR TABLE public.outbox" \
+                || echo "Publication already exists, skipping."
 ---
 apiVersion: v1
 kind: Service
@@ -68,6 +88,13 @@ spec:
       containers:
         - name: fastapi-db
           image: pgvector/pgvector:pg16
+          args:
+            - -c
+            - wal_level=logical
+            - -c
+            - max_replication_slots=10
+            - -c
+            - max_wal_senders=10
           env:
             - { name: POSTGRES_DB, value: "neuralops_fastapi_db" }
             - { name: POSTGRES_USER, value: "neuralops_fastapi" }
@@ -210,9 +237,12 @@ spec:
         - name: elasticsearch
           image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
           env:
-            - { name: discovery.type, value: "single-node" }
-            - { name: xpack.security.enabled, value: "false" }
-            - { name: ES_JAVA_OPTS, value: "-Xms256m -Xmx256m" }
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enabled
+              value: "false"
+            - name: ES_JAVA_OPTS
+              value: "-Xms256m -Xmx256m"
           ports:
             - containerPort: 9200
           readinessProbe:
@@ -228,3 +258,93 @@ metadata:
 spec:
   selector: { app: elasticsearch }
   ports: [{ port: 9200, targetPort: 9200 }]
+
+---
+# ── MinIO (Local S3 Mock Object Storage) ──────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: data
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: minio }
+  template:
+    metadata:
+      labels: { app: minio }
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio:RELEASE.2024-01-28T22-35-53Z
+          env:
+            - { name: MINIO_ROOT_USER, value: "minioadmin" }
+            - { name: MINIO_ROOT_PASSWORD, value: "minioadminpassword" }
+          args: ["server", "/data", "--console-address", ":9001"]
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          readinessProbe:
+            httpGet: { path: /minio/health/live, port: 9000 }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: data
+spec:
+  selector: { app: minio }
+  ports: 
+    - { name: api, port: 9000, targetPort: 9000 }
+    - { name: console, port: 9001, targetPort: 9001 }
+
+---
+# -- Debezium Connect ---------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debezium
+  namespace: data
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: debezium }
+  template:
+    metadata:
+      labels: { app: debezium }
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: debezium
+          image: debezium/connect:2.7.0.Final
+          env:
+            - { name: KAFKA_HEAP_OPTS, value: "-Xms256m -Xmx512m" }
+            - { name: BOOTSTRAP_SERVERS, value: "kafka.data.svc.cluster.local:9092" }
+            - { name: GROUP_ID, value: "debezium-django-db1" }
+            - { name: CONFIG_STORAGE_TOPIC, value: "debezium_configs" }
+            - { name: OFFSET_STORAGE_TOPIC, value: "debezium_offsets" }
+            - { name: STATUS_STORAGE_TOPIC, value: "debezium_status" }
+            - { name: CONFIG_STORAGE_REPLICATION_FACTOR, value: "1" }
+            - { name: OFFSET_STORAGE_REPLICATION_FACTOR, value: "1" }
+            - { name: STATUS_STORAGE_REPLICATION_FACTOR, value: "1" }
+          ports:
+            - containerPort: 8083
+              name: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: debezium
+  namespace: data
+spec:
+  ports:
+    - { port: 8083, targetPort: api, name: api }
+  selector: { app: debezium }
+

@@ -12,3 +12,4 @@ data:
   CELERY_RESULT_BACKEND: "redis://redis.data.svc.cluster.local:6379/2"
   KAFKA_BOOTSTRAP_SERVERS: "kafka.data.svc.cluster.local:9092"
   ELASTICSEARCH_HOSTS: '["http://elasticsearch.data.svc.cluster.local:9200"]'
+  AWS_S3_ENDPOINT_URL: "http://minio.data.svc.cluster.local:9000"
