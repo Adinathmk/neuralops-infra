@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - ../../base
   - local-infra.yaml
-  - secrets.yaml
   - ingress.yaml
   - strimzi-kafka.yaml
   - eck-elasticsearch.yaml
