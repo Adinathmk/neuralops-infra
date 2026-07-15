@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+  namespace: app
+spec:
+  template:
+    spec:
+      containers:
+        - name: django
+          volumeMounts:
+            - name: es-ca-cert
+              mountPath: /etc/ssl/es
+              readOnly: true
+      volumes:
+        - name: es-ca-cert
+          configMap:
+            name: es-ca-cert

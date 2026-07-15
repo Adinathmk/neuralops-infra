@@ -17,3 +17,9 @@ gitops/overlays/local/secrets.yaml
 kubeconfig*.yaml
 
 .DS_Store
+
+# Certificates and keys
+*.crt
+*.key
+*.pem
+es-ca.crt

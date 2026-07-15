@@ -47,19 +47,6 @@ spec:
       volumes:
         - name: data
           emptyDir: {}
-      initContainers:
-        - name: init-publication
-          image: pgvector/pgvector:pg16
-          env:
-            - { name: PGPASSWORD, value: "neuralops_password" }
-          command:
-            - sh
-            - -c
-            - |
-              until pg_isready -h 127.0.0.1 -U neuralops -d django_db; do sleep 1; done
-              psql -h 127.0.0.1 -U neuralops -d django_db -c \
-                "CREATE PUBLICATION debezium_django_publication FOR TABLE public.outbox" \
-                || echo "Publication already exists, skipping."
 ---
 apiVersion: v1
 kind: Service
@@ -158,108 +145,7 @@ spec:
   ports: [{ port: 6379, targetPort: 6379 }]
 
 ---
-# ── Kafka (single-broker, KRaft mode — same image as docker-compose.yml) ─────
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kafka
-  namespace: data
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: kafka
-  template:
-    metadata:
-      labels:
-        app: kafka
-    spec:
-      enableServiceLinks: false
-      containers:
-        - name: kafka
-          image: confluentinc/cp-kafka:7.7.0
-          imagePullPolicy: IfNotPresent
-          env:
-            - { name: CLUSTER_ID, value: "RdEoWBwUQyuyHQvv8SfHSA" }
-            - { name: KAFKA_NODE_ID, value: "1" }
-            - { name: KAFKA_PROCESS_ROLES, value: "broker,controller" }
-            - { name: KAFKA_CONTROLLER_QUORUM_VOTERS, value: "1@localhost:9093" }
-            - { name: KAFKA_LISTENERS, value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093" }
-            - { name: KAFKA_ADVERTISED_LISTENERS, value: "PLAINTEXT://kafka.data.svc.cluster.local:9092" }
-            - { name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP, value: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT" }
-            - { name: KAFKA_CONTROLLER_LISTENER_NAMES, value: "CONTROLLER" }
-            - { name: KAFKA_INTER_BROKER_LISTENER_NAME, value: "PLAINTEXT" }
-            - { name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR, value: "1" }
-            - { name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR, value: "1" }
-            - { name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR, value: "1" }
-            - { name: KAFKA_AUTO_CREATE_TOPICS_ENABLE, value: "true" }
-            - { name: KAFKA_LOG_DIRS, value: "/var/lib/kafka/data" }
-          ports:
-            - containerPort: 9092
-            - containerPort: 9093
-          volumeMounts:
-            - name: kafka-data
-              mountPath: /var/lib/kafka/data
 
-      volumes:
-        - name: kafka-data
-          emptyDir: {}
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kafka
-  namespace: data
-spec:
-  selector:
-    app: kafka
-  ports:
-    - port: 9092
-      targetPort: 9092
-
----
-# ── Elasticsearch (single-node) ───────────────────────────────────────────────
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: elasticsearch
-  namespace: data
-spec:
-  replicas: 1
-  selector:
-    matchLabels: { app: elasticsearch }
-  template:
-    metadata:
-      labels: { app: elasticsearch }
-    spec:
-      containers:
-        - name: elasticsearch
-          image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-          env:
-            - name: discovery.type
-              value: single-node
-            - name: xpack.security.enabled
-              value: "false"
-            - name: ES_JAVA_OPTS
-              value: "-Xms256m -Xmx256m"
-          ports:
-            - containerPort: 9200
-          readinessProbe:
-            httpGet: { path: /, port: 9200 }
-            initialDelaySeconds: 20
-            periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: elasticsearch
-  namespace: data
-spec:
-  selector: { app: elasticsearch }
-  ports: [{ port: 9200, targetPort: 9200 }]
-
----
 # ── MinIO (Local S3 Mock Object Storage) ──────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
@@ -326,7 +212,7 @@ spec:
           image: debezium/connect:2.7.0.Final
           env:
             - { name: KAFKA_HEAP_OPTS, value: "-Xms256m -Xmx512m" }
-            - { name: BOOTSTRAP_SERVERS, value: "kafka.data.svc.cluster.local:9092" }
+            - { name: BOOTSTRAP_SERVERS, value: "kafka-kafka-bootstrap.data.svc.cluster.local:9092" }
             - { name: GROUP_ID, value: "debezium-django-db1" }
             - { name: CONFIG_STORAGE_TOPIC, value: "debezium_configs" }
             - { name: OFFSET_STORAGE_TOPIC, value: "debezium_offsets" }
