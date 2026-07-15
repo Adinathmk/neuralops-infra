@@ -8,6 +8,7 @@ resources:
   - ingress.yaml
   - strimzi-kafka.yaml
   - eck-elasticsearch.yaml
+  - secret-store.yaml
 
 patches:
   - path: django-config-patch.yaml
