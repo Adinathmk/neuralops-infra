@@ -1,0 +1,27 @@
+# Tells Prometheus (via the Prometheus Operator's ServiceMonitor CRD) to
+# scrape FastAPI's /metrics endpoint. Requires the fastapi Service to have
+# metadata.labels matching the selector below (spec.selector alone, which
+# only controls traffic routing, is NOT sufficient — this is the same bug
+# class that blocked Kong's ServiceMonitor from matching earlier).
+#
+# The "release: kube-prometheus-stack" label matches Kong's confirmed-working
+# ServiceMonitor (gitops/base/kong/servicemonitor.yaml) — kept for
+# consistency with what's already proven to work in this cluster.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: fastapi
+  namespace: app
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: fastapi
+  namespaceSelector:
+    matchNames:
+      - app
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
