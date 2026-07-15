@@ -52,7 +52,7 @@ images:
     newTag: local
   - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
     newName: neuralops-fastapi
-    newTag: local
+    newTag: "20260715113357"
 
 configMapGenerator:
   - name: es-ca-cert
