@@ -92,6 +92,8 @@ kind: Service
 metadata:
   name: kong
   namespace: app
+  labels:
+    app: kong
 spec:
   selector:
     app: kong
