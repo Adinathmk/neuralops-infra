@@ -9,6 +9,8 @@ resources:
   - strimzi-kafka.yaml
   - eck-elasticsearch.yaml
   - secret-store.yaml
+  - django-external-secret.yaml
+  - fastapi-external-secret.yaml
 
 patches:
   - path: django-config-patch.yaml
