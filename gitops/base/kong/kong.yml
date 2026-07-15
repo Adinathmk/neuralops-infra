@@ -319,6 +319,14 @@ consumers:
 
 # ── Global Plugins ─────────────────────────────────────────────────────────────
 plugins:
+  # ── Prometheus metrics ──────────────────────────────────────────────────────
+  - name: prometheus
+    config:
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+      upstream_health_metrics: true
+
   # ── CORS (Cross-Origin Resource Sharing) ──────────────────────────────────
   - name: cors
     config:
@@ -414,3 +422,4 @@ plugins:
               ngx.arg[1] = res
             end
           end
+
