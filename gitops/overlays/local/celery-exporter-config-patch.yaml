@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-exporter-django
+  namespace: app
+spec:
+  template:
+    spec:
+      containers:
+        - name: celery-exporter
+          env:
+            - name: CE_BROKER_URL
+              value: "redis://redis.data.svc.cluster.local:6379/0"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-exporter-fastapi
+  namespace: app
+spec:
+  template:
+    spec:
+      containers:
+        - name: celery-exporter
+          env:
+            - name: CE_BROKER_URL
+              value: "redis://redis.data.svc.cluster.local:6379/2"

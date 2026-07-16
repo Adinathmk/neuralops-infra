@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-exporter-fastapi
+  namespace: app
+  labels:
+    app: celery-exporter-fastapi
+    tier: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-exporter-fastapi
+  template:
+    metadata:
+      labels:
+        app: celery-exporter-fastapi
+    spec:
+      containers:
+        - name: celery-exporter
+          image: danihodovic/celery-exporter:latest
+          args:
+            - "--broker-url=$(CE_BROKER_URL)"
+          env:
+            - name: CE_BROKER_URL
+              value: "PLACEHOLDER_SET_PER_OVERLAY"
+          ports:
+            - containerPort: 9808
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 150m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: celery-exporter-fastapi
+  namespace: app
+  labels:
+    app: celery-exporter-fastapi
+spec:
+  selector:
+    app: celery-exporter-fastapi
+  ports:
+    - name: http
+      port: 9808
+      targetPort: 9808
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: celery-exporter-fastapi
+  namespace: app
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: celery-exporter-fastapi
+  namespaceSelector:
+    matchNames:
+      - app
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

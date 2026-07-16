@@ -28,6 +28,14 @@ patches:
     target:
       kind: Deployment
       name: django
+  - path: celery-exporter-config-patch.yaml
+    target:
+      kind: Deployment
+      name: celery-exporter-django
+  - path: celery-exporter-config-patch.yaml
+    target:
+      kind: Deployment
+      name: celery-exporter-fastapi
 
 # All base Deployments use PLACEHOLDER_ECR_REPO images — for local
 # testing these are swapped to images built+loaded directly into kind

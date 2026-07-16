@@ -9,3 +9,5 @@ resources:
   - celery-beat
   - celery-worker-fastapi
   - kafka-consumer
+  - celery-exporter-django
+  - celery-exporter-fastapi
