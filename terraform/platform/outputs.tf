@@ -85,3 +85,6 @@ output "artifacts_bucket_arn" {
 output "ecr_repository_urls" {
   value = { for name, repo in aws_ecr_repository.main : name => repo.repository_url }
 }
+output "eso_role_arn" {
+  value = aws_iam_role.eso.arn
+}
