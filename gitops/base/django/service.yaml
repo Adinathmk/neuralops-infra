@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: django
   namespace: app
+  labels:
+    app: django
 spec:
   selector:
     app: django

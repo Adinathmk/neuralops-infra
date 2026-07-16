@@ -1,0 +1,22 @@
+# Tells Prometheus to scrape Django's /metrics endpoint (django-prometheus).
+# Same pattern as kong/servicemonitor.yaml and fastapi/servicemonitor.yaml —
+# requires the django Service to have metadata.labels matching the selector
+# below (spec.selector alone only controls traffic routing).
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: django
+  namespace: app
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: django
+  namespaceSelector:
+    matchNames:
+      - app
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
