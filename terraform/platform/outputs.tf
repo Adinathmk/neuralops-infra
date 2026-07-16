@@ -17,3 +17,20 @@ output "nat_gateway_ids" {
   description = "IDs of the NAT gateway(s)"
   value       = aws_nat_gateway.main[*].id
 }
+
+output "eks_cluster_id" {
+  value = aws_eks_cluster.main.id
+}
+
+output "eks_cluster_endpoint" {
+  value = aws_eks_cluster.main.endpoint
+}
+
+output "eks_cluster_ca_certificate" {
+  value     = aws_eks_cluster.main.certificate_authority[0].data
+  sensitive = true
+}
+
+output "oidc_provider_arn" {
+  value = aws_iam_openid_connect_provider.eks.arn
+}
