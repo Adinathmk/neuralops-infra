@@ -82,3 +82,6 @@ output "artifacts_bucket_name" {
 output "artifacts_bucket_arn" {
   value = aws_s3_bucket.artifacts.arn
 }
+output "ecr_repository_urls" {
+  value = { for name, repo in aws_ecr_repository.main : name => repo.repository_url }
+}
