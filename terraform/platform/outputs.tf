@@ -75,3 +75,10 @@ output "redis_port" {
 output "redis_security_group_id" {
   value = aws_security_group.redis.id
 }
+output "artifacts_bucket_name" {
+  value = aws_s3_bucket.artifacts.bucket
+}
+
+output "artifacts_bucket_arn" {
+  value = aws_s3_bucket.artifacts.arn
+}
