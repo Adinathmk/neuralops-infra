@@ -51,7 +51,7 @@ patches:
 images:
   - name: PLACEHOLDER_ECR_REPO/neuralops-django
     newName: neuralops-django
-    newTag: "20260716050104"
+    newTag: "20260716063506"
   - name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
     newName: neuralops-django-worker
     newTag: local
@@ -60,7 +60,7 @@ images:
     newTag: local
   - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
     newName: neuralops-fastapi
-    newTag: "20260715113357"
+    newTag: "20260716063902"
 
 configMapGenerator:
   - name: es-ca-cert
