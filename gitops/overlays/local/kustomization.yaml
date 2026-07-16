@@ -28,11 +28,11 @@ patches:
     target:
       kind: Deployment
       name: django
-  - path: celery-exporter-config-patch.yaml
+  - path: celery-exporter-django-config-patch.yaml
     target:
       kind: Deployment
       name: celery-exporter-django
-  - path: celery-exporter-config-patch.yaml
+  - path: celery-exporter-fastapi-config-patch.yaml
     target:
       kind: Deployment
       name: celery-exporter-fastapi
