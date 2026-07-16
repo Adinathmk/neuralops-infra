@@ -34,3 +34,14 @@ output "eks_cluster_ca_certificate" {
 output "oidc_provider_arn" {
   value = aws_iam_openid_connect_provider.eks.arn
 }
+output "eks_node_group_arn" {
+  value = aws_eks_node_group.main.arn
+}
+
+output "eks_node_group_asg_name" {
+  value = aws_eks_node_group.main.resources[0].autoscaling_groups[0].name
+}
+
+output "eks_node_role_arn" {
+  value = aws_iam_role.eks_node.arn
+}
