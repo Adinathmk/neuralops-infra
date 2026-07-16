@@ -43,7 +43,7 @@ patches:
 images:
   - name: PLACEHOLDER_ECR_REPO/neuralops-django
     newName: neuralops-django
-    newTag: local
+    newTag: "20260716050104"
   - name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
     newName: neuralops-django-worker
     newTag: local
