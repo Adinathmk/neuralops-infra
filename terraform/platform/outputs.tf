@@ -45,3 +45,22 @@ output "eks_node_group_asg_name" {
 output "eks_node_role_arn" {
   value = aws_iam_role.eks_node.arn
 }
+output "django_db_endpoint" {
+  value = aws_db_instance.django.endpoint
+}
+
+output "django_db_name" {
+  value = aws_db_instance.django.db_name
+}
+
+output "fastapi_db_endpoint" {
+  value = aws_db_instance.fastapi.endpoint
+}
+
+output "fastapi_db_name" {
+  value = aws_db_instance.fastapi.db_name
+}
+
+output "rds_security_group_id" {
+  value = aws_security_group.rds.id
+}
