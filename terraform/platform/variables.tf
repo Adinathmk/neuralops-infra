@@ -43,13 +43,13 @@ variable "eks_cluster_version" {
 variable "eks_node_instance_type" {
   description = "EC2 instance type for EKS worker nodes"
   type        = string
-  default     = "t3.small"
+  default     = "c7i-flex.large"
 }
 
 variable "eks_node_desired_size" {
   description = "Desired number of EKS worker nodes"
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "eks_node_min_size" {
@@ -73,7 +73,7 @@ variable "rds_instance_class" {
 variable "rds_allocated_storage" {
   description = "Allocated storage (GB) for each RDS instance"
   type        = number
-  default     = 30
+  default     = 20
 }
 
 variable "rds_multi_az" {
