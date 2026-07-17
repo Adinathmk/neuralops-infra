@@ -70,3 +70,19 @@ resource "aws_secretsmanager_secret_version" "fastapi" {
     JWT_PUBLIC_KEY        = tls_private_key.jwt.public_key_pem
   })
 }
+
+resource "random_password" "grafana_admin" {
+  length           = 24
+  special          = true
+  override_special = "!@#$%^&*(-_=+)"
+}
+resource "aws_secretsmanager_secret" "grafana" {
+  name = "${var.project_name}/grafana"
+}
+resource "aws_secretsmanager_secret_version" "grafana" {
+  secret_id = aws_secretsmanager_secret.grafana.id
+  secret_string = jsonencode({
+    admin-user     = "admin"
+    admin-password = random_password.grafana_admin.result
+  })
+}
