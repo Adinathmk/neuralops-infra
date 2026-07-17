@@ -10,6 +10,7 @@ resources:
   - secret-store.yaml
   - django-external-secret.yaml
   - fastapi-external-secret.yaml
+  - storageclass.yaml
 
 patches:
   - path: django-config-patch.yaml
