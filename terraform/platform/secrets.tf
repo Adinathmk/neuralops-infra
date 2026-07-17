@@ -64,7 +64,7 @@ resource "aws_secretsmanager_secret_version" "fastapi" {
   secret_id = aws_secretsmanager_secret.fastapi.id
   secret_string = jsonencode({
     DATABASE_URL          = local.fastapi_db_url
-    REDIS_URL             = "${local.redis_url}/2"
+    REDIS_URL             = "${local.redis_url}/1"
     CELERY_BROKER_URL     = "${local.redis_url}/2" # TODO: confirm db number matches app expectations
     CELERY_RESULT_BACKEND = "${local.redis_url}/2" # TODO: confirm — same db as broker, or different?
     JWT_PUBLIC_KEY        = tls_private_key.jwt.public_key_pem
