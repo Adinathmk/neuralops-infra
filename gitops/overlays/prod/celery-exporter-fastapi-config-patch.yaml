@@ -10,4 +10,4 @@ spec:
         - name: celery-exporter
           env:
             - name: CE_BROKER_URL
-              value: "redis://redis.data.svc.cluster.local:6379/2"
+              value: "redis://neuralops-redis.djvi8t.0001.aps1.cache.amazonaws.com:6379/2"
