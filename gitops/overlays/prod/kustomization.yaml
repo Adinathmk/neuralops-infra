@@ -67,7 +67,7 @@ images:
     newTag: sha-223f23f
   - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
     newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-fastapi
-    newTag: sha-223f23f
+    newTag: sha-cdf66b1
 configMapGenerator:
   - name: es-ca-cert
     namespace: app
