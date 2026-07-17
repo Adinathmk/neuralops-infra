@@ -49,7 +49,7 @@ variable "eks_node_instance_type" {
 variable "eks_node_desired_size" {
   description = "Desired number of EKS worker nodes"
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "eks_node_min_size" {
@@ -73,7 +73,7 @@ variable "rds_instance_class" {
 variable "rds_allocated_storage" {
   description = "Allocated storage (GB) for each RDS instance"
   type        = number
-  default     = 20
+  default     = 30
 }
 
 variable "rds_multi_az" {
