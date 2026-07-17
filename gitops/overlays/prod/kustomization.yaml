@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - ../../base
   - debezium.yaml
-  - ingress.yaml
   - strimzi-kafka.yaml
   - eck-elasticsearch.yaml
   - secret-store.yaml
