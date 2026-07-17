@@ -1,0 +1,66 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - debezium.yaml
+  - ingress.yaml
+  - strimzi-kafka.yaml
+  - eck-elasticsearch.yaml
+  - secret-store.yaml
+  - django-external-secret.yaml
+  - fastapi-external-secret.yaml
+
+patches:
+  - path: django-config-patch.yaml
+    target:
+      kind: ConfigMap
+      name: django-config
+  - path: fastapi-config-patch.yaml
+    target:
+      kind: ConfigMap
+      name: fastapi-config
+  - path: es-ca-mount-fastapi-patch.yaml
+    target:
+      kind: Deployment
+      name: fastapi
+  - path: es-ca-mount-django-patch.yaml
+    target:
+      kind: Deployment
+      name: django
+  - path: celery-exporter-django-config-patch.yaml
+    target:
+      kind: Deployment
+      name: celery-exporter-django
+  - path: celery-exporter-fastapi-config-patch.yaml
+    target:
+      kind: Deployment
+      name: celery-exporter-fastapi
+
+images:
+  # NOTE: these ECR repos are currently EMPTY — no images pushed yet.
+  # "prod-pending" is a placeholder tag; it will not pull successfully
+  # until Phase 7 (CI/CD) or a manual build+push replaces it with a
+  # real tag. Do not attempt to scale up django/fastapi Deployments
+  # against this overlay until then.
+  - name: PLACEHOLDER_ECR_REPO/neuralops-django
+    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
+    newTag: prod-pending
+  - name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
+    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-worker
+    newTag: prod-pending
+  - name: PLACEHOLDER_ECR_REPO/neuralops-django-kafka-consumer
+    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-kafka-consumer
+    newTag: prod-pending
+  - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
+    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-fastapi
+    newTag: prod-pending
+
+
+configMapGenerator:
+  - name: es-ca-cert
+    namespace: app
+    files:
+      - es-ca.crt
+generatorOptions:
+  disableNameSuffixHash: true

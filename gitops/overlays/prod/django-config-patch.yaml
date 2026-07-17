@@ -1,0 +1,27 @@
+# Strategic-merge patch: ADD keys to the base django-config ConfigMap
+# that differ between local/prod. DATABASE_URL, DATABASE_REPLICA_URL,
+# REDIS_URL, KAFKA_BOOTSTRAP_SERVERS, ELASTICSEARCH_URL, and SENTRY_DSN
+# are intentionally NOT here — they live in the django-secrets Secret
+# (sourced from AWS Secrets Manager) to avoid duplicate-source-of-truth
+# bugs. AWS_S3_* MinIO endpoints removed — prod uses real S3 directly.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+  namespace: app
+data:
+  DEBUG: "False"
+  # TODO(Phase 6): replace with real prod domain once Cloudflare/ALB/ACM is set up
+  ALLOWED_HOSTS: "PLACEHOLDER_PROD_DOMAIN"
+  # TODO(Phase 6): all four below need the real prod frontend domain once it exists
+  CORS_ALLOWED_ORIGINS: "PLACEHOLDER_PROD_DOMAIN"
+  FRONTEND_URL: "PLACEHOLDER_PROD_DOMAIN"
+  FRONTEND_OAUTH_ERROR_URL: "PLACEHOLDER_PROD_DOMAIN/login"
+  FRONTEND_OAUTH_SUCCESS_URL: "PLACEHOLDER_PROD_DOMAIN/dashboard"
+  EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
+  EMAIL_HOST: "email-smtp.ap-south-1.amazonaws.com"
+  EMAIL_PORT: "587"
+  EMAIL_USE_TLS: "True"
+  DEFAULT_FROM_EMAIL: "adinathmkclt@gmail.com"
+  AWS_S3_SIGNED_URL_EXPIRY: "900"
+
