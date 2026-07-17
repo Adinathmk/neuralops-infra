@@ -56,23 +56,18 @@ patches:
       kind: ServiceMonitor
       name: kong
 images:
-  # NOTE: these ECR repos are currently EMPTY — no images pushed yet.
-  # "prod-pending" is a placeholder tag; it will not pull successfully
-  # until Phase 7 (CI/CD) or a manual build+push replaces it with a
-  # real tag. Do not attempt to scale up django/fastapi Deployments
-  # against this overlay until then.
   - name: PLACEHOLDER_ECR_REPO/neuralops-django
     newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
-    newTag: prod-pending
+    newTag: sha-223f23f
   - name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
     newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-worker
-    newTag: prod-pending
+    newTag: sha-223f23f
   - name: PLACEHOLDER_ECR_REPO/neuralops-django-kafka-consumer
     newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-kafka-consumer
-    newTag: prod-pending
+    newTag: sha-223f23f
   - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
     newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-fastapi
-    newTag: prod-pending
+    newTag: sha-223f23f
 configMapGenerator:
   - name: es-ca-cert
     namespace: app
