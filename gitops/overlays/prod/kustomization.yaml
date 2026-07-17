@@ -9,6 +9,7 @@ resources:
   - django-external-secret.yaml
   - fastapi-external-secret.yaml
   - storageclass.yaml
+  - grafana-external-secret.yaml
 patches:
   - path: django-config-patch.yaml
     target:
