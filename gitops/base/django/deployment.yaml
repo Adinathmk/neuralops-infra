@@ -32,6 +32,9 @@ spec:
             httpGet:
               path: /api/v1/health
               port: 8000
+              httpHeaders:
+                - name: Host
+                  value: adinath.site
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
@@ -39,6 +42,9 @@ spec:
             httpGet:
               path: /api/v1/health
               port: 8000
+              httpHeaders:
+                - name: Host
+                  value: adinath.site
             initialDelaySeconds: 40
             periodSeconds: 20
             timeoutSeconds: 5
