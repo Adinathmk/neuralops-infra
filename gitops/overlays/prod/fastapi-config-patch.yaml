@@ -14,4 +14,4 @@ data:
   APP_ENV: "production"
   DEBUG: "false"
   ELASTICSEARCH_CA_CERT_PATH: "/etc/ssl/es/es-ca.crt"
-  CORS_ALLOWED_ORIGINS: 'PLACEHOLDER_PROD_DOMAIN'
+  CORS_ALLOWED_ORIGINS: 'https://adinath.site'
