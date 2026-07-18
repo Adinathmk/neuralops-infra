@@ -73,7 +73,7 @@ variable "rds_instance_class" {
 variable "rds_allocated_storage" {
   description = "Allocated storage (GB) for each RDS instance"
   type        = number
-  default     = 30
+  default     = 20
 }
 
 variable "rds_multi_az" {
