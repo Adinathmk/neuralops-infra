@@ -45,14 +45,21 @@ resource "aws_secretsmanager_secret" "django" {
 resource "aws_secretsmanager_secret_version" "django" {
   secret_id = aws_secretsmanager_secret.django.id
   secret_string = jsonencode({
-    DATABASE_URL          = local.django_db_url
-    DATABASE_REPLICA_URL  = local.django_db_url # TODO: point at a real read replica once one exists
-    REDIS_URL             = "${local.redis_url}/0"
-    SECRET_KEY            = random_password.django_secret_key.result
-    FERNET_ENCRYPTION_KEY = var.fernet_encryption_key
-    JWT_PRIVATE_KEY       = tls_private_key.jwt.private_key_pem
-    JWT_PUBLIC_KEY        = tls_private_key.jwt.public_key_pem
-    VAPID_PRIVATE_KEY     = var.vapid_private_key
+    DATABASE_URL            = local.django_db_url
+    DATABASE_REPLICA_URL    = local.django_db_url # TODO: point at a real read replica once one exists
+    DB_HOST                 = aws_db_instance.django.address
+    DB_PORT                 = tostring(aws_db_instance.django.port)
+    DB_USER                 = aws_db_instance.django.username
+    DB_NAME                 = aws_db_instance.django.db_name
+    REDIS_URL               = "${local.redis_url}/0"
+    REDIS_HOST              = local.redis_host
+    REDIS_PORT              = tostring(local.redis_port)
+    KAFKA_BOOTSTRAP_SERVERS = "kafka-kafka-bootstrap.data.svc.cluster.local:9092"
+    SECRET_KEY              = random_password.django_secret_key.result
+    FERNET_ENCRYPTION_KEY   = var.fernet_encryption_key
+    JWT_PRIVATE_KEY         = tls_private_key.jwt.private_key_pem
+    JWT_PUBLIC_KEY          = tls_private_key.jwt.public_key_pem
+    VAPID_PRIVATE_KEY       = var.vapid_private_key
   })
 }
 
