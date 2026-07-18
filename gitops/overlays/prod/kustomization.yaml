@@ -73,5 +73,10 @@ configMapGenerator:
     namespace: app
     files:
       - es-ca.crt
+  - name: kong-declarative-config
+    namespace: app
+    behavior: replace
+    files:
+      - kong.yml
 generatorOptions:
   disableNameSuffixHash: true
