@@ -279,6 +279,15 @@ services:
         preserve_host: true
         protocols: [http, https]
 
+      - name: fastapi-docs-route
+        paths:
+          - /docs
+          - /redoc
+          - /openapi.json
+        strip_path: false
+        preserve_host: true
+        protocols: [http, https]
+
   # ── MinIO Service ────────────────────────────────────────────────────────
   - name: minio-service
     host: minio-upstream
