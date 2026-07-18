@@ -11,7 +11,7 @@ metadata:
   namespace: app
 data:
   DEBUG: "False"
-  ALLOWED_HOSTS: "adinath.site"
+  ALLOWED_HOSTS: ".adinath.site"
   CORS_ALLOWED_ORIGINS: "https://adinath.site"
   FRONTEND_URL: "https://adinath.site"
   FRONTEND_OAUTH_ERROR_URL: "https://adinath.site/login"
