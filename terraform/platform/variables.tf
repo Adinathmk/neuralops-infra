@@ -70,8 +70,14 @@ variable "rds_instance_class" {
   default     = "db.t3.micro"
 }
 
-variable "rds_allocated_storage" {
-  description = "Allocated storage (GB) for each RDS instance"
+variable "rds_allocated_storage_django" {
+  description = "Allocated storage (GB) for the django RDS instance. Note: RDS storage can only grow, never shrink - this floor is permanent once applied."
+  type        = number
+  default     = 30
+}
+
+variable "rds_allocated_storage_fastapi" {
+  description = "Allocated storage (GB) for the fastapi RDS instance. Note: RDS storage can only grow, never shrink - this floor is permanent once applied."
   type        = number
   default     = 20
 }

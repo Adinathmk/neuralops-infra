@@ -58,7 +58,7 @@ resource "aws_db_instance" "django" {
   identifier             = "${var.project_name}-django-db"
   engine                 = "postgres"
   instance_class         = var.rds_instance_class
-  allocated_storage      = var.rds_allocated_storage
+  allocated_storage      = var.rds_allocated_storage_django
   db_name                = "django"
   username               = "django_admin"
   password               = random_password.django_db.result
@@ -67,6 +67,8 @@ resource "aws_db_instance" "django" {
   multi_az               = var.rds_multi_az
   publicly_accessible    = false
   skip_final_snapshot    = true
+  parameter_group_name   = aws_db_parameter_group.postgres_logical_replication.name
+  apply_immediately      = true
 
   tags = {
     Name = "${var.project_name}-django-db"
@@ -77,7 +79,7 @@ resource "aws_db_instance" "fastapi" {
   identifier             = "${var.project_name}-fastapi-db"
   engine                 = "postgres"
   instance_class         = var.rds_instance_class
-  allocated_storage      = var.rds_allocated_storage
+  allocated_storage      = var.rds_allocated_storage_fastapi
   db_name                = "fastapi"
   username               = "fastapi_admin"
   password               = random_password.fastapi_db.result
@@ -86,8 +88,25 @@ resource "aws_db_instance" "fastapi" {
   multi_az               = var.rds_multi_az
   publicly_accessible    = false
   skip_final_snapshot    = true
+  parameter_group_name   = aws_db_parameter_group.postgres_logical_replication.name
+  apply_immediately      = true
 
   tags = {
     Name = "${var.project_name}-fastapi-db"
+  }
+}
+
+resource "aws_db_parameter_group" "postgres_logical_replication" {
+  name   = "${var.project_name}-postgres-logical-replication"
+  family = "postgres18"
+
+  parameter {
+    name         = "rds.logical_replication"
+    value        = "1"
+    apply_method = "pending-reboot"
+  }
+
+  tags = {
+    Name = "${var.project_name}-postgres-logical-replication"
   }
 }
