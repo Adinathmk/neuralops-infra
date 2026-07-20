@@ -38,3 +38,15 @@ resource "aws_s3_bucket_public_access_block" "artifacts" {
 }
 
 data "aws_caller_identity" "current" {}
+
+resource "aws_s3_bucket_cors_configuration" "artifacts" {
+  bucket = aws_s3_bucket.artifacts.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "POST", "GET", "HEAD"]
+    allowed_origins = ["*"] # Allow all origins (including localhost)
+    expose_headers  = []
+    max_age_seconds = 3000
+  }
+}

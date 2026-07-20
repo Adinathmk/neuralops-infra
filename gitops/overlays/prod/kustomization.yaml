@@ -13,6 +13,7 @@ resources:
 - ingress.yaml
 - grafana-ingress.yaml
 - argocd-ingress.yaml
+- django-serviceaccount.yaml
 patches:
 - path: django-config-patch.yaml
   target:
@@ -58,6 +59,10 @@ patches:
   target:
     kind: ServiceMonitor
     name: kong
+- path: django-serviceaccount-patch.yaml
+  target:
+    kind: Deployment
+    name: django
 images:
 - name: PLACEHOLDER_ECR_REPO/neuralops-django
   newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
