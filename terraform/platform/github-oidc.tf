@@ -131,3 +131,34 @@ resource "aws_iam_role_policy_attachment" "github_infra_plan_readonly" {
   role       = aws_iam_role.github_actions_infra_plan.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
+
+# ------------------------------------------------------------
+# Supplemental: DynamoDB state-lock permissions for terraform plan
+# ReadOnlyAccess does not include dynamodb:GetItem/PutItem/DeleteItem,
+# but `terraform plan` still needs to acquire/release the S3 backend's
+# state lock even though it makes no infrastructure changes.
+# Scoped tightly to only the lock table, nothing broader.
+# ------------------------------------------------------------
+data "aws_iam_policy_document" "github_infra_plan_dynamodb_lock" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:DeleteItem",
+    ]
+    resources = [
+      "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/neuralops-terraform-locks"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "github_infra_plan_dynamodb_lock" {
+  name   = "github-actions-infra-plan-dynamodb-lock"
+  policy = data.aws_iam_policy_document.github_infra_plan_dynamodb_lock.json
+}
+
+resource "aws_iam_role_policy_attachment" "github_infra_plan_dynamodb_lock" {
+  role       = aws_iam_role.github_actions_infra_plan.name
+  policy_arn = aws_iam_policy.github_infra_plan_dynamodb_lock.arn
+}
