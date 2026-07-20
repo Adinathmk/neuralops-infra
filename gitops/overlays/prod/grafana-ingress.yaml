@@ -1,13 +1,13 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: neuralops-api-ingress
-  namespace: app
+  name: grafana-ingress
+  namespace: monitoring
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/group.name: neuralops-shared
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:160823835768:certificate/a4d8b0f7-8e3c-4b1a-8935-f237941bb38c
-    alb.ingress.kubernetes.io/healthcheck-path: /api/v1/health
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:160823835768:certificate/44de8d0b-c084-4542-89a3-9d745159e9f8
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health
     alb.ingress.kubernetes.io/healthcheck-port: "80"
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
@@ -17,13 +17,13 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: api.neuralops.adinath.site
+    - host: grafana.neuralops.adinath.site
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: kong
+                name: kube-prometheus-stack-prod-grafana
                 port:
                   number: 80

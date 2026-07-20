@@ -11,6 +11,7 @@ resources:
   - storageclass.yaml
   - grafana-external-secret.yaml
   - ingress.yaml
+  - grafana-ingress.yaml
 patches:
   - path: django-config-patch.yaml
     target:
