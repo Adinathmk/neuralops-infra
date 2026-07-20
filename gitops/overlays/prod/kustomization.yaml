@@ -1,85 +1,94 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../../base
-  - debezium.yaml
-  - strimzi-kafka.yaml
-  - eck-elasticsearch.yaml
-  - secret-store.yaml
-  - django-external-secret.yaml
-  - fastapi-external-secret.yaml
-  - storageclass.yaml
-  - grafana-external-secret.yaml
-  - ingress.yaml
-  - grafana-ingress.yaml
-  - argocd-ingress.yaml
+- ../../base
+- debezium.yaml
+- strimzi-kafka.yaml
+- eck-elasticsearch.yaml
+- secret-store.yaml
+- django-external-secret.yaml
+- fastapi-external-secret.yaml
+- storageclass.yaml
+- grafana-external-secret.yaml
+- ingress.yaml
+- grafana-ingress.yaml
+- argocd-ingress.yaml
 patches:
-  - path: django-config-patch.yaml
-    target:
-      kind: ConfigMap
-      name: django-config
-  - path: fastapi-config-patch.yaml
-    target:
-      kind: ConfigMap
-      name: fastapi-config
-  - path: es-ca-mount-fastapi-patch.yaml
-    target:
-      kind: Deployment
-      name: fastapi
-  - path: es-ca-mount-django-patch.yaml
-    target:
-      kind: Deployment
-      name: django
-  - path: celery-exporter-django-config-patch.yaml
-    target:
-      kind: Deployment
-      name: celery-exporter-django
-  - path: celery-exporter-fastapi-config-patch.yaml
-    target:
-      kind: Deployment
-      name: celery-exporter-fastapi
-  - path: delete-servicemonitors-patch.yaml
-    target:
-      kind: ServiceMonitor
-      name: celery-exporter-django
-  - path: delete-servicemonitors-patch.yaml
-    target:
-      kind: ServiceMonitor
-      name: celery-exporter-fastapi
-  - path: delete-servicemonitors-patch.yaml
-    target:
-      kind: ServiceMonitor
-      name: django
-  - path: delete-servicemonitors-patch.yaml
-    target:
-      kind: ServiceMonitor
-      name: fastapi
-  - path: delete-servicemonitors-patch.yaml
-    target:
-      kind: ServiceMonitor
-      name: kong
+- path: django-config-patch.yaml
+  target:
+    kind: ConfigMap
+    name: django-config
+- path: fastapi-config-patch.yaml
+  target:
+    kind: ConfigMap
+    name: fastapi-config
+- path: es-ca-mount-fastapi-patch.yaml
+  target:
+    kind: Deployment
+    name: fastapi
+- path: es-ca-mount-django-patch.yaml
+  target:
+    kind: Deployment
+    name: django
+- path: celery-exporter-django-config-patch.yaml
+  target:
+    kind: Deployment
+    name: celery-exporter-django
+- path: celery-exporter-fastapi-config-patch.yaml
+  target:
+    kind: Deployment
+    name: celery-exporter-fastapi
+- path: delete-servicemonitors-patch.yaml
+  target:
+    kind: ServiceMonitor
+    name: celery-exporter-django
+- path: delete-servicemonitors-patch.yaml
+  target:
+    kind: ServiceMonitor
+    name: celery-exporter-fastapi
+- path: delete-servicemonitors-patch.yaml
+  target:
+    kind: ServiceMonitor
+    name: django
+- path: delete-servicemonitors-patch.yaml
+  target:
+    kind: ServiceMonitor
+    name: fastapi
+- path: delete-servicemonitors-patch.yaml
+  target:
+    kind: ServiceMonitor
+    name: kong
 images:
-  - name: PLACEHOLDER_ECR_REPO/neuralops-django
-    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
-    newTag: sha-5b7aa9a
-  - name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
-    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-worker
-    newTag: sha-5b7aa9a
-  - name: PLACEHOLDER_ECR_REPO/neuralops-django-kafka-consumer
-    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-kafka-consumer
-    newTag: sha-5b7aa9a
-  - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
-    newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-fastapi
-    newTag: sha-cdf66b1
+- name: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
+  newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
+  newTag: sha-ba436ff
+- name: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-kafka-consumer
+  newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-kafka-consumer
+  newTag: sha-ba436ff
+- name: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-worker
+  newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-worker
+  newTag: sha-ba436ff
+- name: PLACEHOLDER_ECR_REPO/neuralops-django
+  newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
+  newTag: sha-5b7aa9a
+- name: PLACEHOLDER_ECR_REPO/neuralops-django-kafka-consumer
+  newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-kafka-consumer
+  newTag: sha-5b7aa9a
+- name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
+  newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-worker
+  newTag: sha-5b7aa9a
+- name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
+  newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-fastapi
+  newTag: sha-cdf66b1
 configMapGenerator:
-  - name: es-ca-cert
-    namespace: app
-    files:
-      - es-ca.crt
-  - name: kong-declarative-config
-    namespace: app
-    behavior: replace
-    files:
-      - kong.yml
+- files:
+  - es-ca.crt
+  name: es-ca-cert
+  namespace: app
+- behavior: replace
+  files:
+  - kong.yml
+  name: kong-declarative-config
+  namespace: app
 generatorOptions:
   disableNameSuffixHash: true
