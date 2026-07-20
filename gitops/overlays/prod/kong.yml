@@ -293,13 +293,13 @@ consumers:
         algorithm: RS256
         rsa_public_key: |
           -----BEGIN PUBLIC KEY-----
-          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArw/EwBiAmWXR2hJBYR5Q
-          M/dUvBKyQ6L+tcTrNRVWWaPIEX0TJ/mpAS8uCwYjV4Mj/2/NwMyQn/D8T/2d3v/J
-          tY/eziz8u7MzBgWnPOyOvPGd811SNiHIRCFDmDkUIRAmKcTfY06/XL/+nSdzCmv7
-          GOhDpQFcu5t2kXpXo+JYzZRXiNfOolesKgL5H9OvfIQEcDbjYLkH6bleCyZayAa0
-          wXX1oDNzPDdHzTRsljra45lBUaQGlZf9/u/T+3aymbG3KtXPGttBpor5w7lXP757
-          /GRZ1m/2fP4xtq0UlpB6M6hTbH/fxmY8HD0Mz08+e5+dQHa+4+jFSTQSC5iRtQcG
-          QQIDAQAB
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzHpDfz0Zc9w/4s92PCvW
+          3P/o4VsjmdTgkIO4rCs+dcoRK3S0fKZhI+NFbIklA3CPfb6uP+wLS7o5sWLeNJO4
+          iSc/k8q8bUTZ+gyw0FIomJxpiRnh2L1ovQZpMr9qM9ZxjnANS/AsOmeJ1bR19NI6
+          yZtN/cxyK5aZiDJLObNIDrZAVcMwPjPQ/l1p8Mw/jENQ9ejzO4HwB/Svozv0bd7J
+          mJqSGyjZ+J1lgZaYyU2pjl0aeMcSe9u5J7w+S/xc06jTj6I2J8qSnbmh3gQ0A+D0
+          bb/B5RvzBhDasJIahvGLIYkufEzQDkie1/P8ekBHG/1U2+rNt/fIcHJHo4a0OTfl
+          iQIDAQAB
           -----END PUBLIC KEY-----
 # NOTE (k8s-specific): this rsa_public_key MUST be the public half of the
 # same JWT_PRIVATE_KEY Django signs with. Once JWT keys move into AWS
