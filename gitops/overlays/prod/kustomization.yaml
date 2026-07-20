@@ -12,6 +12,7 @@ resources:
   - grafana-external-secret.yaml
   - ingress.yaml
   - grafana-ingress.yaml
+  - argocd-ingress.yaml
 patches:
   - path: django-config-patch.yaml
     target:
