@@ -1,0 +1,29 @@
+{
+  "name": "django-outbox-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "neuralops-django-db.che2wcomuqm0.ap-south-1.rds.amazonaws.com",
+    "database.port": "5432",
+    "database.user": "django_admin",
+    "database.password": "REPLACE_FROM_SECRETS_MANAGER_neuralops/django_DATABASE_URL",
+    "database.dbname": "django",
+    "topic.prefix": "django",
+    "plugin.name": "pgoutput",
+    "publication.name": "outbox_publication",
+    "publication.autocreate.mode": "disabled",
+    "slot.name": "debezium_django_outbox",
+    "table.include.list": "public.outbox",
+    "transforms": "outbox",
+    "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
+    "transforms.outbox.route.by.field": "topic",
+    "transforms.outbox.route.topic.replacement": "${routedByValue}",
+    "transforms.outbox.table.field.event.id": "event_id",
+    "transforms.outbox.table.field.event.key": "key",
+    "transforms.outbox.table.field.event.payload": "payload",
+    "transforms.outbox.table.expand.json.payload": "true",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}
