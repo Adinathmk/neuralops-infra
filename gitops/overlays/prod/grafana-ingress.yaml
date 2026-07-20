@@ -8,7 +8,7 @@ metadata:
     alb.ingress.kubernetes.io/group.name: neuralops-shared
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:160823835768:certificate/44de8d0b-c084-4542-89a3-9d745159e9f8
     alb.ingress.kubernetes.io/healthcheck-path: /api/health
-    alb.ingress.kubernetes.io/healthcheck-port: "80"
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/ssl-redirect: "443"
