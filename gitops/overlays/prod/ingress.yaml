@@ -1,19 +1,23 @@
-# Local stand-in for ALB — routes everything to Kong, which then applies
-# its own path-based routing/JWT/rate-limiting per kong.yml. In prod,
-# this is replaced by an ALB Ingress (AWS Load Balancer Controller
-# annotations) in overlays/prod, same destination (Kong Service),
-# different ingress class/annotations.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: neuralops-ingress
+  name: neuralops-api-ingress
   namespace: app
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:160823835768:certificate/a4d8b0f7-8e3c-4b1a-8935-f237941bb38c
+    alb.ingress.kubernetes.io/healthcheck-path: /api/v1/health
+    alb.ingress.kubernetes.io/healthcheck-port: "80"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/target-type: ip
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
   rules:
-    - http:
+    - host: api.neuralops.adinath.site
+      http:
         paths:
           - path: /
             pathType: Prefix
