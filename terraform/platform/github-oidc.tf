@@ -162,3 +162,34 @@ resource "aws_iam_role_policy_attachment" "github_infra_plan_dynamodb_lock" {
   role       = aws_iam_role.github_actions_infra_plan.name
   policy_arn = aws_iam_policy.github_infra_plan_dynamodb_lock.arn
 }
+
+# ------------------------------------------------------------
+# Supplemental: Secrets Manager read access for terraform plan
+# ReadOnlyAccess deliberately excludes secretsmanager:GetSecretValue
+# (AWS treats reading a secret's value as sensitive, not "read-only").
+# Terraform still needs it to diff aws_secretsmanager_secret_version
+# resources against live state. Scoped to only the 3 real app secrets.
+# ------------------------------------------------------------
+data "aws_iam_policy_document" "github_infra_plan_secrets_read" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [
+      aws_secretsmanager_secret.django.arn,
+      aws_secretsmanager_secret.fastapi.arn,
+      aws_secretsmanager_secret.grafana.arn,
+    ]
+  }
+}
+
+resource "aws_iam_policy" "github_infra_plan_secrets_read" {
+  name   = "github-actions-infra-plan-secrets-read"
+  policy = data.aws_iam_policy_document.github_infra_plan_secrets_read.json
+}
+
+resource "aws_iam_role_policy_attachment" "github_infra_plan_secrets_read" {
+  role       = aws_iam_role.github_actions_infra_plan.name
+  policy_arn = aws_iam_policy.github_infra_plan_secrets_read.arn
+}
