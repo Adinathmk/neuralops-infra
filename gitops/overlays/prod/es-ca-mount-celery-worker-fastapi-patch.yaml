@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker-fastapi
+  namespace: app
+spec:
+  template:
+    spec:
+      containers:
+        - name: celery-worker-fastapi
+          volumeMounts:
+            - name: es-ca-cert
+              mountPath: /etc/ssl/es
+              readOnly: true
+      volumes:
+        - name: es-ca-cert
+          configMap:
+            name: es-ca-cert

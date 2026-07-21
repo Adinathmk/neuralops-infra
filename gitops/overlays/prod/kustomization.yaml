@@ -28,6 +28,10 @@ patches:
   target:
     kind: Deployment
     name: fastapi
+- path: es-ca-mount-celery-worker-fastapi-patch.yaml
+  target:
+    kind: Deployment
+    name: celery-worker-fastapi
 - path: es-ca-mount-django-patch.yaml
   target:
     kind: Deployment
