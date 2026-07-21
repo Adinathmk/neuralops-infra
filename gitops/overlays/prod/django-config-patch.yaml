@@ -23,3 +23,4 @@ data:
   DEFAULT_FROM_EMAIL: "adinathmkclt@gmail.com"
   AWS_S3_SIGNED_URL_EXPIRY: "900"
   AWS_S3_BUCKET_NAME: "neuralops-artifacts-160823835768"
+  AWS_S3_REGION_NAME: "ap-south-1"
