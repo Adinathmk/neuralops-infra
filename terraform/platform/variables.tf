@@ -93,11 +93,3 @@ variable "elasticache_node_type" {
   type        = string
   default     = "cache.t3.micro"
 }
-
-# CI pipeline test commit - safe to ignore
-
-# CI pipeline test commit - safe to ignore
-
-# CI pipeline test commit - safe to ignore
-# CI pipeline retest - verifying input=false fix
-# CI pipeline retest - verifying secretsmanager fix
