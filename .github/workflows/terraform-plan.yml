@@ -34,7 +34,7 @@ jobs:
 
       - name: Terraform init
         working-directory: terraform/platform
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform validate
         working-directory: terraform/platform
@@ -42,4 +42,7 @@ jobs:
 
       - name: Terraform plan
         working-directory: terraform/platform
-        run: terraform plan -no-color
+        env:
+          TF_VAR_fernet_encryption_key: ${{ secrets.TF_VAR_FERNET_ENCRYPTION_KEY }}
+          TF_VAR_vapid_private_key: ${{ secrets.TF_VAR_VAPID_PRIVATE_KEY }}
+        run: terraform plan -no-color -input=false
