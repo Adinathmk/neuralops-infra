@@ -84,7 +84,7 @@ images:
   newTag: sha-76b9421
 - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
   newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-fastapi
-  newTag: sha-eabe6bd
+  newTag: sha-01c1732
 configMapGenerator:
 - files:
   - es-ca.crt
