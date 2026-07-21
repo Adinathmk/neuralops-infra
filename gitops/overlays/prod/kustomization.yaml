@@ -66,13 +66,13 @@ patches:
 images:
 - name: PLACEHOLDER_ECR_REPO/neuralops-django
   newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django
-  newTag: sha-f684781
+  newTag: sha-960e9dc
 - name: PLACEHOLDER_ECR_REPO/neuralops-django-kafka-consumer
   newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-kafka-consumer
-  newTag: sha-f684781
+  newTag: sha-960e9dc
 - name: PLACEHOLDER_ECR_REPO/neuralops-django-worker
   newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-django-worker
-  newTag: sha-f684781
+  newTag: sha-960e9dc
 - name: PLACEHOLDER_ECR_REPO/neuralops-fastapi
   newName: 160823835768.dkr.ecr.ap-south-1.amazonaws.com/neuralops-fastapi
   newTag: sha-f684781
